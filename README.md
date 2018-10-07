@@ -5,7 +5,7 @@
 
 Provides RHVoice voices and languages for `rhvoice-wrapper-bin`.
 
-# rhvoice-wrapper-bin
+# [rhvoice-wrapper-bin](https://github.com/Aculeasis/rhvoice-wrapper-bin)
 [![PyPI version](https://img.shields.io/pypi/v/rhvoice-wrapper-bin.svg)](https://pypi.org/project/rhvoice-wrapper-bin/) [![Python versions](https://img.shields.io/pypi/pyversions/rhvoice-wrapper-bin.svg)](https://pypi.org/project/rhvoice-wrapper-bin/) [![PyPI - Format](https://img.shields.io/pypi/format/rhvoice-wrapper-bin.svg)](https://pypi.org/project/rhvoice-wrapper-bin/) [![Build Status](https://travis-ci.org/Aculeasis/rhvoice-wrapper-bin.svg?branch=master)](https://travis-ci.org/Aculeasis/rhvoice-wrapper-bin)
 
 Provides RHVoice libraries for `rhvoice-wrapper`. Depends on `rhvoice-wrapper-data`, that contains languages and voices.
