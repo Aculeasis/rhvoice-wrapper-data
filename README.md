@@ -1,4 +1,5 @@
 ## rhvoice-wrapper-data
+[![PyPI version](https://img.shields.io/pypi/v/rhvoice-wrapper-data.svg)](https://pypi.org/project/rhvoice-wrapper-data/) [![Python versions](https://img.shields.io/pypi/pyversions/rhvoice-wrapper-data.svg)](https://pypi.org/project/rhvoice-wrapper-data/) [![Build Status](https://travis-ci.org/Aculeasis/rhvoice-wrapper-data.svg?branch=master)](https://travis-ci.org/Aculeasis/rhvoice-wrapper-data)
 
 Provides RHVoice libraries and data for rhvoice-wrapper. Linux only.
 
@@ -17,27 +18,25 @@ Install package from source. This download and build RHVoice and may take many t
 `pip install rhvoice-wrapper-data --no-binary rhvoice-wrapper-data`
 
 ## Usage
-rhvoice-wrapper will automatically use paths from rhvoice_wrapper_data:
-```python
-from rhvoice_wrapper import TTS
-tts = TTS()
+rhvoice-wrapper will automatically use data path from rhvoice_wrapper_data.
+You must set package library path for LD before run python scripts. You may set `LD_LIBRARY_PATH`, this must be works:
+```bash
+export LD_LIBRARY_PATH=$(pip3 show rhvoice-wrapper-data | grep Location | awk '{print $2}')/rhvoice_wrapper_data/lib/
+python3 -u <script using rhvoice_wrapper>
 ```
-Or you may use this manually:
+#### Get info from library
 ```python
-from rhvoice_wrapper import TTS
 import rhvoice_wrapper_data
+# All the paths will None in error
 
-# Contains path to the RHVoice library or None if errors
+# Contains path to the RHVoice library
 print(rhvoice_wrapper_data.lib_path)
-# Contains path to the RHVoice data or None if errors
+# Contains path to the RHVoice data
 print(rhvoice_wrapper_data.data_path)
-
-tts = TTS(lib_path=rhvoice_wrapper_data.lib_path, data_path=rhvoice_wrapper_data.data_path)
-```
-Or use installed RHVoice instead of rhvoice-wrapper-data
-```python
-from rhvoice_wrapper import TTS
-tts = TTS(lib_path=None, data_path=None)
+# Contains path to the RHVoice libraries. Must be set as dynamic libraries path
+print(rhvoice_wrapper_data.LIBS_PATH)
+# Contains path to the rhvoice-wrapper-data
+print(rhvoice_wrapper_data.PATH)
 ```
 ## Links
 
