@@ -15,6 +15,7 @@ install:
 
 build: off
 
-after_test:
-  - python setup.py sdist
-  - python -m pip install dist/*
+test_script:
+  - python setup.py sdist python3 setup.py sdist bdist_wheel
+  - python setup.py bdist_wheel
+  - python setup.py bdist_wininst
