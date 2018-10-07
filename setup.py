@@ -62,6 +62,9 @@ class RHVoiceBuild(build):
             self.debug_print('Starting data copying...')
             for target in data_paths:
                 dst = os.path.join(build_lib_data, os.path.basename(target))
+                if os.path.exists(dst):
+                    self.debug_print('Existing path {}. deleting...'.format(dst))
+                    shutil.rmtree(dst, ignore_errors=True)
                 self.debug_print('copying {} to {}...'.format(target, dst))
                 dst = shutil.copytree(target, dst, ignore=_ignore_install)
                 self.debug_print('copy {} to {}'.format(target, dst))
