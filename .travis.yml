@@ -13,9 +13,9 @@ install:
 before_script:
   - sudo locale-gen ru_RU.UTF-8
   - python setup.py sdist
-  - pip install dist/*
-  - rm -rf rhvoice_wrapper_data/ dist/
   - git clone https://github.com/Aculeasis/rhvoice-proxy
 script:
+  - pip install dist/* -vvv
   - cd rhvoice-proxy/
+  - export LD_LIBRARY_PATH=$(pip show rhvoice-wrapper-data | grep Location | awk '{print $2}')/rhvoice_wrapper_data/lib/
   - python -m unittest discover -v -s rhvoice_wrapper/tests/

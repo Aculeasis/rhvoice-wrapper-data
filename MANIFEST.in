@@ -1,6 +1,3 @@
 include LICENSE.md
 include README.md
 include version
-include build.sh
-recursive-include rhvoice_wrapper_data/data *
-

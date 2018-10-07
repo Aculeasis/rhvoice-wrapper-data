@@ -1,11 +1,10 @@
 import os
 import shutil
-import stat
 import subprocess
 import sys
+from distutils.command.build import build
 
 from setuptools import setup
-from setuptools.command.install import install
 
 try:
     from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
@@ -26,51 +25,19 @@ except ImportError:
 
 
 PACKAGE_PATH = 'rhvoice_wrapper_data'
-RHVOICE_PATH = 'RHVoice'
-build_sh = './build.sh'
-libraries_path = [
-    os.path.join(RHVOICE_PATH, 'build/linux/core/libRHVoice_core.so'),
-    os.path.join(RHVOICE_PATH, 'build/linux/lib/libRHVoice.so')
-]
-data_paths = [
-    os.path.join(RHVOICE_PATH, 'data/languages'),
-    os.path.join(RHVOICE_PATH, 'data/voices')
-]
+RHVOICE = 'RHVoice'
+SOURCE_URL = 'https://github.com/Olga-Yakovleva/RHVoice.git'
+DATA = 'data'
+LIB = 'lib'
 
 
-def _1_build():
-    st = os.stat(build_sh)
-    os.chmod(build_sh, st.st_mode | stat.S_IEXEC)
-    run = subprocess.run([build_sh])
-    if run.returncode != 0:
-        return 'Failed RHVoice building: {}'.format(run.returncode)
-
-
-def _2_check_build():
+def _check_build(libraries_path, data_paths):
     for target in libraries_path:
         if not os.path.isfile(target):
             return 'File {} not found'.format(target)
     for target in data_paths:
         if not os.path.isdir(target):
             return 'Directory {} not found'.format(target)
-
-
-def _3_copy_data(build_path, package_data_path):
-    for target in libraries_path:
-        dst = shutil.copy(target, build_path)
-        st = os.stat(dst)
-        os.chmod(dst, st.st_mode | stat.S_IEXEC)
-    if os.path.isdir(package_data_path):
-        shutil.rmtree(package_data_path, ignore_errors=True)
-    os.mkdir(package_data_path)
-    for target in data_paths:
-        shutil.copytree(target, os.path.join(package_data_path, os.path.basename(target)), ignore=_ignore_install)
-
-
-def _4_build_clear():
-    shutil.rmtree(RHVOICE_PATH, ignore_errors=True)
-    st = os.stat(build_sh)
-    os.chmod(build_sh, st.st_mode ^ stat.S_IEXEC)
 
 
 def _ignore_install(src, names):
@@ -80,17 +47,66 @@ def _ignore_install(src, names):
     return []
 
 
-class Install(install):
+class RHVoiceBuild(build):
     def run(self):
-        build_path = os.path.join(self.build_lib, PACKAGE_PATH)
-        package_data_path = os.path.join(build_path, 'data')
-        err = _1_build() or _2_check_build() or _3_copy_data(build_path, package_data_path)
-        _4_build_clear()
-        if err:
-            RuntimeError(err)
-        super().run()
-        if os.path.isdir(build_path):
-            shutil.rmtree(build_path, ignore_errors=True)
+        def exec_(params, path_cwd):
+            run = subprocess.run(params, cwd=path_cwd)
+            if run.returncode != 0:
+                raise RuntimeError('Error executing {} in {}'.format(params, str(path_cwd)))
+
+        rhvoice_path = os.path.join(self.build_lib, RHVOICE)
+        build_lib = os.path.join(self.build_lib, PACKAGE_PATH)
+        build_lib_data = os.path.join(build_lib, DATA)
+        build_lib_lib = os.path.join(build_lib, LIB)
+
+        self.mkpath(self.build_lib)
+        self.mkpath(build_lib_data)
+        self.mkpath(build_lib_lib)
+
+        libraries_path = [
+            os.path.join(rhvoice_path, 'build/linux/core/libRHVoice_core.so'),
+            os.path.join(rhvoice_path, 'build/linux/lib/libRHVoice.so')
+        ]
+        data_paths = [
+            os.path.join(rhvoice_path, 'data/languages'),
+            os.path.join(rhvoice_path, 'data/voices')
+        ]
+
+        clone = [['git', 'clone', SOURCE_URL, rhvoice_path], None]
+        commit = 'dc36179'
+        checkout = [['git', 'checkout', commit], rhvoice_path]
+        scons = [['scons'], rhvoice_path]
+
+        if not os.path.isdir(rhvoice_path):
+            self.execute(exec_, clone, 'Clone {}'.format(SOURCE_URL))
+            self.execute(exec_, checkout, 'Git checkout {}'.format(commit))
+        else:
+            self.warn('Use existing source data from {}'.format(rhvoice_path))
+        if _check_build(libraries_path, data_paths) is None:
+            self.warn('Source already build? Use existing binary data from {}'.format(rhvoice_path))
+        else:
+            self.execute(exec_, scons, 'Compiling RHVoice...')
+
+        msg = _check_build(libraries_path, data_paths)
+        if msg is not None:
+            raise RuntimeError(msg)
+
+        if not self.dry_run:  # copy file and folders
+            self.debug_print('Starting libraries copying..')
+            for target in libraries_path:
+                dst = os.path.join(build_lib_lib, os.path.basename(target))
+                self.debug_print('copying {} to {}...'.format(target, dst))
+                dst = shutil.copy(target, dst)
+                self.debug_print('copy {} to {}'.format(target, dst))
+
+            self.debug_print('Starting data copying...')
+            for target in data_paths:
+                dst = os.path.join(build_lib_data, os.path.basename(target))
+                self.debug_print('copying {} to {}...'.format(target, dst))
+                dst = shutil.copytree(target, dst, ignore=_ignore_install)
+                self.debug_print('copy {} to {}'.format(target, dst))
+
+        build.run(self)
 
 
 with open('README.md') as fh:
@@ -103,6 +119,7 @@ setup(
     name='rhvoice-wrapper-data',
     version=version,
     packages=[PACKAGE_PATH],
+    package_data={PACKAGE_PATH: ['{}/*'.format(DATA), '{}/*'.format(LIB)]},
     url='https://github.com/Aculeasis/rhvoice-wrapper-data',
     platforms='linux',
     license='GPLv3+',
@@ -122,5 +139,6 @@ setup(
         'Topic :: Software Development :: Libraries',
     ],
     zip_safe=False,
-    cmdclass={'install': Install, 'bdist_wheel': bdist_wheel},
+    cmdclass={'build': RHVoiceBuild, 'bdist_wheel': bdist_wheel},
+    include_package_data=True,
 )
