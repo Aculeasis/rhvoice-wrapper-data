@@ -1,0 +1,20 @@
+version: 1.0.0 ({build})
+
+environment:
+  matrix:
+    - PYTHON: C:\Python35
+    - PYTHON: C:\Python36
+    - PYTHON: C:\Python35-x64
+    - PYTHON: C:\Python36-x64
+
+init:
+  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+
+install:
+  - python -m pip install --upgrade pip setuptools wheel
+
+build: off
+
+after_test:
+  - python setup.py sdist
+  - python -m pip install dist/*
