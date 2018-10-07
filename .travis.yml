@@ -16,6 +16,7 @@ before_script:
   - git clone https://github.com/Aculeasis/rhvoice-proxy
 script:
   - pip install dist/* -vvv
+  - pip install rhvoice-wrapper-bin
   - cd rhvoice-proxy/
-  - export LD_LIBRARY_PATH=$(pip show rhvoice-wrapper-data | grep Location | awk '{print $2}')/rhvoice_wrapper_data/lib/
+  - export LD_LIBRARY_PATH=$(pip show rhvoice-wrapper-bin | grep Location | awk '{print $2}')/rhvoice_wrapper_bin/lib/
   - python -m unittest discover -v -s rhvoice_wrapper/tests/

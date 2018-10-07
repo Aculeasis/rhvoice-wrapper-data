@@ -1,40 +1,35 @@
 import os
 import shutil
 import subprocess
-import sys
 from distutils.command.build import build
 
 from setuptools import setup
 
-try:
-    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-
-    class bdist_wheel(_bdist_wheel):
-
-        def finalize_options(self):
-            _bdist_wheel.finalize_options(self)
-            # Mark us as not a pure python package
-            self.root_is_pure = False
-
-        def get_tag(self):
-            python, abi, plat = _bdist_wheel.get_tag(self)
-            python, abi = 'py{}'.format(sys.version_info[0]), 'none'
-            return python, abi, plat
-except ImportError:
-    bdist_wheel = None
+# try:
+#     from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+#
+#     class bdist_wheel(_bdist_wheel):
+#
+#         def finalize_options(self):
+#             _bdist_wheel.finalize_options(self)
+#             # Mark us as not a pure python package
+#             self.root_is_pure = False
+#
+#         def get_tag(self):
+#             python, abi, plat = _bdist_wheel.get_tag(self)
+#             python, abi = 'py{}'.format(sys.version_info[0]), 'none'
+#             return python, abi, plat
+# except ImportError:
+#     bdist_wheel = None
 
 
 PACKAGE_PATH = 'rhvoice_wrapper_data'
 RHVOICE = 'RHVoice'
 SOURCE_URL = 'https://github.com/Olga-Yakovleva/RHVoice.git'
 DATA = 'data'
-LIB = 'lib'
 
 
-def _check_build(libraries_path, data_paths):
-    for target in libraries_path:
-        if not os.path.isfile(target):
-            return 'File {} not found'.format(target)
+def _check_build(data_paths):
     for target in data_paths:
         if not os.path.isdir(target):
             return 'Directory {} not found'.format(target)
@@ -57,17 +52,11 @@ class RHVoiceBuild(build):
         rhvoice_path = os.path.join(self.build_base, RHVOICE)
         build_lib = os.path.join(self.build_lib, PACKAGE_PATH)
         build_lib_data = os.path.join(build_lib, DATA)
-        build_lib_lib = os.path.join(build_lib, LIB)
 
         self.mkpath(self.build_base)
         self.mkpath(self.build_lib)
         self.mkpath(build_lib_data)
-        self.mkpath(build_lib_lib)
 
-        libraries_path = [
-            os.path.join(rhvoice_path, 'build/linux/core/libRHVoice_core.so'),
-            os.path.join(rhvoice_path, 'build/linux/lib/libRHVoice.so')
-        ]
         data_paths = [
             os.path.join(rhvoice_path, 'data/languages'),
             os.path.join(rhvoice_path, 'data/voices')
@@ -76,30 +65,18 @@ class RHVoiceBuild(build):
         clone = [['git', 'clone', SOURCE_URL, rhvoice_path], None]
         commit = 'dc36179'
         checkout = [['git', 'checkout', commit], rhvoice_path]
-        scons = [['scons'], rhvoice_path]
 
         if not os.path.isdir(rhvoice_path):
             self.execute(exec_, clone, 'Clone {}'.format(SOURCE_URL))
             self.execute(exec_, checkout, 'Git checkout {}'.format(commit))
         else:
             self.warn('Use existing source data from {}'.format(rhvoice_path))
-        if _check_build(libraries_path, data_paths) is None:
-            self.warn('Source already build? Use existing binary data from {}'.format(rhvoice_path))
-        else:
-            self.execute(exec_, scons, 'Compiling RHVoice...')
 
-        msg = _check_build(libraries_path, data_paths)
+        msg = _check_build(data_paths)
         if msg is not None:
             raise RuntimeError(msg)
 
-        if not self.dry_run:  # copy file and folders
-            self.debug_print('Starting libraries copying..')
-            for target in libraries_path:
-                dst = os.path.join(build_lib_lib, os.path.basename(target))
-                self.debug_print('copying {} to {}...'.format(target, dst))
-                dst = shutil.copy(target, dst)
-                self.debug_print('copy {} to {}'.format(target, dst))
-
+        if not self.dry_run:  # copy data folders
             self.debug_print('Starting data copying...')
             for target in data_paths:
                 dst = os.path.join(build_lib_data, os.path.basename(target))
@@ -116,21 +93,17 @@ with open('README.md') as fh:
 with open('version') as fh:
     version = fh.read().splitlines()[0]
 
-cmd_class = {'build': RHVoiceBuild}
-if bdist_wheel:
-    cmd_class['bdist_wheel'] = bdist_wheel
-
 setup(
     name='rhvoice-wrapper-data',
     version=version,
     packages=[PACKAGE_PATH],
-    package_data={PACKAGE_PATH: ['{}/*'.format(DATA), '{}/*'.format(LIB)]},
+    package_data={PACKAGE_PATH: ['{}/*'.format(DATA)]},
     url='https://github.com/Aculeasis/rhvoice-wrapper-data',
     platforms='linux',
     license='GPLv3+',
     author='Aculeasis',
     author_email='amilpalimov2@ya.ru',
-    description='Provides RHVoice libraries and data for rhvoice-wrapper',
+    description='Provides RHVoice data for rhvoice-wrapper-bin',
     long_description=long_description,
     long_description_content_type='text/markdown',
     python_requires='>=3',
@@ -143,6 +116,6 @@ setup(
         'Topic :: Software Development :: Libraries',
     ],
     zip_safe=False,
-    cmdclass=cmd_class,
+    cmdclass={'build': RHVoiceBuild},
     include_package_data=True,
 )
