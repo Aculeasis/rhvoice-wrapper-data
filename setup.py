@@ -115,6 +115,10 @@ with open('README.md') as fh:
 with open('version') as fh:
     version = fh.read().splitlines()[0]
 
+cmd_class = {'build': RHVoiceBuild}
+if bdist_wheel:
+    cmd_class['bdist_wheel'] = bdist_wheel
+
 setup(
     name='rhvoice-wrapper-data',
     version=version,
@@ -138,6 +142,6 @@ setup(
         'Topic :: Software Development :: Libraries',
     ],
     zip_safe=False,
-    cmdclass={'build': RHVoiceBuild, 'bdist_wheel': bdist_wheel},
+    cmdclass=cmd_class,
     include_package_data=True,
 )
