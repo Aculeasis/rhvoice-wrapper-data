@@ -131,7 +131,6 @@ setup(
     python_requires='>=3',
     classifiers=[
         'Intended Audience :: Developers',
-        'Programming Language :: C++'
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Operating System :: POSIX :: Linux',
