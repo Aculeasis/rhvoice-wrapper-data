@@ -54,11 +54,12 @@ class RHVoiceBuild(build):
             if run.returncode != 0:
                 raise RuntimeError('Error executing {} in {}'.format(params, str(path_cwd)))
 
-        rhvoice_path = os.path.join(self.build_lib, RHVOICE)
+        rhvoice_path = os.path.join(self.build_base, RHVOICE)
         build_lib = os.path.join(self.build_lib, PACKAGE_PATH)
         build_lib_data = os.path.join(build_lib, DATA)
         build_lib_lib = os.path.join(build_lib, LIB)
 
+        self.mkpath(self.build_base)
         self.mkpath(self.build_lib)
         self.mkpath(build_lib_data)
         self.mkpath(build_lib_lib)
