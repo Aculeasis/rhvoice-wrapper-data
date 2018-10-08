@@ -2,8 +2,17 @@ version: 1.0.0 ({build})
 
 environment:
   matrix:
-    - PYTHON: C:\Python35
-    - PYTHON: C:\Python36-x64
+  - PYTHON: C:\Python34
+  - PYTHON: C:\Python34-x64
+  - PYTHON: C:\Python35
+  - PYTHON: C:\Python35-x64
+  - PYTHON: C:\Python36
+  - PYTHON: C:\Python36-x64
+
+matrix:
+  fast_finish: true
+
+clone_depth: 1
 
 init:
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
@@ -11,9 +20,20 @@ init:
 install:
   - python -m pip install --upgrade pip setuptools wheel
 
-build: off
+build:
+  verbosity: quiet
+
+build_script:
+  - python setup.py bdist_wheel bdist_wininst
+  - appveyor AddMessage "Build success"
 
 test_script:
-  - python setup.py sdist
-  - python setup.py bdist_wheel
-  - python setup.py bdist_wininst
+  - cd dist
+  - for %%f in (rhvoice_wrapper_data*.whl) do pip install %%f
+  - cd ..
+  - pip install rhvoice-wrapper-bin --only-binary rhvoice-wrapper-bin
+  - git clone --depth=1 https://github.com/Aculeasis/rhvoice-proxy
+  - cd rhvoice-proxy
+  - python -m unittest discover -v -s rhvoice_wrapper\tests
+  - appveyor AddMessage "Testing success"
+  - cd ..

@@ -8,32 +8,40 @@ from setuptools import setup
 PACKAGE_PATH = 'rhvoice_wrapper_data'
 RHVOICE = 'RHVoice'
 SOURCE_URL = 'https://github.com/Olga-Yakovleva/RHVoice.git'
+CHECKOUT_COMMIT = 'dc36179'
 DATA = 'data'
 
 
-def _check_build(data_paths):
+def check_build(data_paths):
     for target in data_paths:
         if not os.path.isdir(target):
             return 'Directory {} not found'.format(target)
 
 
-def _ignore_install(src, names):
+def ignore_install(src, names):
     # Only 24000 adding
     if '16000' in names and os.path.isdir(os.path.join(src, '16000')) and '24000' in names:
         return ['16000']
     return []
 
 
+def executor(cmd, cwd):
+    err = None
+    try:
+        run = subprocess.run(cmd, cwd=cwd)
+    except Exception as e:
+        err = e
+    else:
+        if run.returncode != 0:
+            err = 'code: {}'.format(run.returncode)
+    if err is not None:
+        raise RuntimeError('Error executing {} in {}. {}'.format(cmd, str(cwd), err))
+
+
 class RHVoiceBuild(build):
     def run(self):
-        def exec_(params, path_cwd):
-            run = subprocess.run(params, cwd=path_cwd)
-            if run.returncode != 0:
-                raise RuntimeError('Error executing {} in {}'.format(params, str(path_cwd)))
-
         rhvoice_path = os.path.join(self.build_base, RHVOICE)
-        build_lib = os.path.join(self.build_lib, PACKAGE_PATH)
-        build_lib_data = os.path.join(build_lib, DATA)
+        build_lib_data = os.path.join(self.build_lib, PACKAGE_PATH, DATA)
 
         self.mkpath(self.build_base)
         self.mkpath(self.build_lib)
@@ -45,16 +53,15 @@ class RHVoiceBuild(build):
         ]
 
         clone = [['git', 'clone', SOURCE_URL, rhvoice_path], None]
-        commit = 'dc36179'
-        checkout = [['git', 'checkout', commit], rhvoice_path]
+        checkout = [['git', 'checkout', CHECKOUT_COMMIT], rhvoice_path]
 
         if not os.path.isdir(rhvoice_path):
-            self.execute(exec_, clone, 'Clone {}'.format(SOURCE_URL))
-            self.execute(exec_, checkout, 'Git checkout {}'.format(commit))
+            self.execute(executor, clone, 'Clone {}'.format(SOURCE_URL))
+            self.execute(executor, checkout, 'Git checkout {}'.format(CHECKOUT_COMMIT))
         else:
             self.warn('Use existing source data from {}'.format(rhvoice_path))
 
-        msg = _check_build(data_paths)
+        msg = check_build(data_paths)
         if msg is not None:
             raise RuntimeError(msg)
 
@@ -66,7 +73,7 @@ class RHVoiceBuild(build):
                     self.debug_print('Existing path {}. deleting...'.format(dst))
                     shutil.rmtree(dst, ignore_errors=True)
                 self.debug_print('copying {} to {}...'.format(target, dst))
-                dst = shutil.copytree(target, dst, ignore=_ignore_install)
+                dst = shutil.copytree(target, dst, ignore=ignore_install)
                 self.debug_print('copy {} to {}'.format(target, dst))
 
         build.run(self)

@@ -1,49 +1,26 @@
-# This package contain only data, rhvoice-wrapper-bin install it yourself
+# This package contain only data, [rhvoice-wrapper-bin](https://github.com/Aculeasis/rhvoice-wrapper-bin) install it yourself
 
-## rhvoice-wrapper-data
 [![PyPI version](https://img.shields.io/pypi/v/rhvoice-wrapper-data.svg)](https://pypi.org/project/rhvoice-wrapper-data/) [![Python versions](https://img.shields.io/pypi/pyversions/rhvoice-wrapper-data.svg)](https://pypi.org/project/rhvoice-wrapper-data/) [![PyPI - Format](https://img.shields.io/pypi/format/rhvoice-wrapper-data.svg)](https://pypi.org/project/rhvoice-wrapper-data/) [![Build Status](https://travis-ci.org/Aculeasis/rhvoice-wrapper-data.svg?branch=master)](https://travis-ci.org/Aculeasis/rhvoice-wrapper-data) [![Build status](https://ci.appveyor.com/api/projects/status/0nnncu1pvbeqjqk1?svg=true)](https://ci.appveyor.com/project/Aculeasis/rhvoice-wrapper-data)
 
-Provides RHVoice voices and languages for `rhvoice-wrapper-bin`.
-
-# [rhvoice-wrapper-bin](https://github.com/Aculeasis/rhvoice-wrapper-bin)
-[![PyPI version](https://img.shields.io/pypi/v/rhvoice-wrapper-bin.svg)](https://pypi.org/project/rhvoice-wrapper-bin/) [![Python versions](https://img.shields.io/pypi/pyversions/rhvoice-wrapper-bin.svg)](https://pypi.org/project/rhvoice-wrapper-bin/) [![PyPI - Format](https://img.shields.io/pypi/format/rhvoice-wrapper-bin.svg)](https://pypi.org/project/rhvoice-wrapper-bin/) [![Build Status](https://travis-ci.org/Aculeasis/rhvoice-wrapper-bin.svg?branch=master)](https://travis-ci.org/Aculeasis/rhvoice-wrapper-bin)
-
-Provides RHVoice libraries for `rhvoice-wrapper`. Depends on `rhvoice-wrapper-data`, that contains languages and voices.
-
-If this package installed, `rhvoice-wrapper` will automatically use it by default.
+Provides RHVoice voices and languages for `rhvoice-wrapper-bin`. Also, you may set data_path in `rhvoice-wrapper` instead.
 
 ## Install
-`pip install rhvoice-wrapper-bin --only-binary rhvoice-wrapper-bin`
+`pip install rhvoice-wrapper-data --only-binary rhvoice-wrapper-data`
 
 ## Install from source
-First, install dependencies to build:
-
-`apt-get install --no-install-recommends scons build-essential python3-pip python3-setuptools python3-wheel`
-
-Install package from source. This download and build RHVoice and may take many time:
-
-`pip install rhvoice-wrapper-bin --no-binary rhvoice-wrapper-bin`
-
-## Usage
-`rhvoice-wrapper` will automatically use data path from `rhvoice-wrapper-bin` (but of course of `rhvoice-wrapper-data`).
-You must set package library path for LD before run python scripts. You may set `LD_LIBRARY_PATH`, this must be works:
+Install git (`apt install git` or `run exe>next>next>done`)
 ```bash
-export LD_LIBRARY_PATH=$(pip3 show rhvoice-wrapper-bin | grep Location | awk '{print $2}')/rhvoice_wrapper_bin/lib/
-python3 -u <script using rhvoice_wrapper>
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install rhvoice-wrapper-data --no-binary rhvoice-wrapper-data
 ```
-#### Get info from library
+### API
 ```python
-import rhvoice_wrapper_bin
-# All the paths will None in error
+import rhvoice_wrapper_data
 
-# Contains path to the RHVoice library
-print(rhvoice_wrapper_bin.lib_path)
 # Contains path to the RHVoice data
-print(rhvoice_wrapper_bin.data_path)
-# Contains path to the RHVoice libraries. Must be set as dynamic libraries path
-print(rhvoice_wrapper_bin.LIBS_PATH)
+print(rhvoice_wrapper_data.data_path)
 # Contains path to the rhvoice-wrapper-data
-print(rhvoice_wrapper_bin.PATH)
+print(rhvoice_wrapper_data.PATH)
 ```
 ## Links
 

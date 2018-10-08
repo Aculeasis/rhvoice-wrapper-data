@@ -1,22 +1,36 @@
 language:
   python
-python:
-  '3.6'
+
+matrix:
+  fast_finish: true
+  include:
+  - python: '3.4'
+  - python: '3.5'
+  - python: '3.6'
+    env: DEPLOY=true
+
 sudo:
-  true
-before_install:
-  - sudo apt-get update -y
-  - sudo apt-get -y install --no-install-recommends lame python3 locales opus-tools
-  - sudo apt-get -y install --no-install-recommends scons build-essential python3-pip
+  false
+
+git:
+  depth: 1
+
 install:
   - pip install setuptools wheel
-before_script:
-  - sudo locale-gen ru_RU.UTF-8
-  - python setup.py sdist
-  - git clone https://github.com/Aculeasis/rhvoice-proxy
+
 script:
-  - pip install dist/* -vvv
-  - pip install rhvoice-wrapper-bin
-  - cd rhvoice-proxy/
-  - export LD_LIBRARY_PATH=$(pip show rhvoice-wrapper-bin | grep Location | awk '{print $2}')/rhvoice_wrapper_bin/lib/
-  - python -m unittest discover -v -s rhvoice_wrapper/tests/
+  - python setup.py sdist bdist_wheel
+  - pip install dist/*-any.whl -vvv
+
+deploy:
+  provider: pypi
+  user: Aculeasis
+  password:
+    secure: dK1LMnOV2OdeDWSWM3decBibwYGPGHLvH9MKdR4vM5G7fKnx/69KX+BqJzNPidCwkAXaiCKVxIScI/dn2zYGsCaiwAthzjWXzXp4W6iBTX3oOUrb8qtKMUw1CRCtgMEPIsKhE4uP6DAWGRaKxEX0Nc+UrKX5efV/C0TzoeI4lRMikAlYceTU95/ko0lRs6z2dMJJbL75FL0sI+69/Kf9dkmtJAZaVOSOZOdlY/pRvpKmTiC0P4ofi1VgANLLMh3xxs1OuJgYi3H18Lky2ZtOZaxDWDozCIOJXBePm2ToLZzY0PUT+b27USGxOqXsgQc/Sj5415GFBjunzx1sBPYdaZI5f2UQuG8Og0AdNhBNfWSh3gZFalEmvg893bFo/YJAV7B+3bXtqL/RgczeXziMNCCpolqUQZAC7GbKQBplP7mkCzoqvmzDpcMbfmy0N2MCq1ViJnIHCFxEx39tZuoKkfDvU0uh8KTmLI6l/6+zl7F3IVvEa5ibIWAGnGCP8E0dWeAirpseSYlRosj86R26hAE2JAPUBmIrxRNv0kTOIlMEdGEk4SJ8+KwWblG/KeZR4AZRpoJnc8jPnx76U9+LOkSMFK2zHJum+Ysvs/RTnb+fk1YE6JVva4Rdq4rXdNQyEmeqheL7QSKXsIXDg2mnTzEC4Vc2X4iwSOuFa9HLaTY=
+  skip_cleanup: true
+  distributions: sdist bdist_wheel
+  skip_existing: true
+  on:
+    tags: true
+    branch: master
+    condition: "$DEPLOY == true"
