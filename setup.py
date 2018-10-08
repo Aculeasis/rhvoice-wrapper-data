@@ -28,12 +28,12 @@ def ignore_install(src, names):
 def executor(cmd, cwd):
     err = None
     try:
-        run = subprocess.run(cmd, cwd=cwd)
+        run = subprocess.call(cmd, cwd=cwd)
     except Exception as e:
         err = e
     else:
-        if run.returncode != 0:
-            err = 'code: {}'.format(run.returncode)
+        if run != 0:
+            err = 'code: {}'.format(run)
     if err is not None:
         raise RuntimeError('Error executing {} in {}. {}'.format(cmd, str(cwd), err))
 
@@ -97,7 +97,7 @@ setup(
     description='Provides RHVoice data for rhvoice-wrapper-bin',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    python_requires='>=3',
+    python_requires='>=3.4',
     classifiers=[
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 3',
