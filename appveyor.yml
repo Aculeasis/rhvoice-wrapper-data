@@ -18,7 +18,7 @@ init:
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 
 install:
-  - python -m pip install --upgrade pip setuptools wheel
+  - python -m pip install --upgrade wheel
 
 build:
   verbosity: quiet

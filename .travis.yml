@@ -17,6 +17,7 @@ git:
 
 install:
   - pip install setuptools wheel
+  - pip install rhvoice-wrapper-bin --only-binary rhvoice-wrapper-bin
 
 script:
   - python setup.py sdist bdist_wheel
