@@ -8,6 +8,7 @@ environment:
   - PYTHON: C:\Python35-x64
   - PYTHON: C:\Python36
   - PYTHON: C:\Python36-x64
+    DEPLOY: true
 
 matrix:
   fast_finish: true
@@ -24,7 +25,8 @@ build:
   verbosity: quiet
 
 build_script:
-  - python setup.py bdist_wheel bdist_wininst
+  - mkdir github
+  - python setup.py bdist_wheel bdist_wininst --dist-dir=github
   - appveyor AddMessage "Build success"
 
 test_script:
@@ -37,3 +39,17 @@ test_script:
   - python -m unittest discover -v -s rhvoice_wrapper\tests
   - appveyor AddMessage "Testing success"
   - cd ..
+
+artifacts:
+  - path: github\*
+    name: exe
+
+deploy:
+  - provider: GitHub
+    auth_token:
+      secure: ctp+XBxvU4Q/6f55WYYIxUF06CAkiuO3VTUshHz4XWsC/sKTrQyQodIEkgfhvIPF
+    artifact: github\*
+    on:
+      branch: master
+      appveyor_repo_tag: true
+      DEPLOY: true
