@@ -18,7 +18,7 @@ install:
   - pip install setuptools wheel
 
 script:
-  - python setup.py sdist --dist-dir=github bdist_wheel
+  - python setup.py sdist bdist_wheel
   - pip install dist/*-any.whl -vvv
 
 deploy:
@@ -26,8 +26,8 @@ deploy:
     user: Aculeasis
     password:
       secure: dK1LMnOV2OdeDWSWM3decBibwYGPGHLvH9MKdR4vM5G7fKnx/69KX+BqJzNPidCwkAXaiCKVxIScI/dn2zYGsCaiwAthzjWXzXp4W6iBTX3oOUrb8qtKMUw1CRCtgMEPIsKhE4uP6DAWGRaKxEX0Nc+UrKX5efV/C0TzoeI4lRMikAlYceTU95/ko0lRs6z2dMJJbL75FL0sI+69/Kf9dkmtJAZaVOSOZOdlY/pRvpKmTiC0P4ofi1VgANLLMh3xxs1OuJgYi3H18Lky2ZtOZaxDWDozCIOJXBePm2ToLZzY0PUT+b27USGxOqXsgQc/Sj5415GFBjunzx1sBPYdaZI5f2UQuG8Og0AdNhBNfWSh3gZFalEmvg893bFo/YJAV7B+3bXtqL/RgczeXziMNCCpolqUQZAC7GbKQBplP7mkCzoqvmzDpcMbfmy0N2MCq1ViJnIHCFxEx39tZuoKkfDvU0uh8KTmLI6l/6+zl7F3IVvEa5ibIWAGnGCP8E0dWeAirpseSYlRosj86R26hAE2JAPUBmIrxRNv0kTOIlMEdGEk4SJ8+KwWblG/KeZR4AZRpoJnc8jPnx76U9+LOkSMFK2zHJum+Ysvs/RTnb+fk1YE6JVva4Rdq4rXdNQyEmeqheL7QSKXsIXDg2mnTzEC4Vc2X4iwSOuFa9HLaTY=
-    skip_cleanup: true
     distributions: sdist bdist_wheel
+    skip_cleanup: true
     skip_existing: true
     on:
       tags: true
@@ -38,7 +38,7 @@ deploy:
     api_key:
       secure: HnnLFAUcrPuiSlQO7Vi8EjQvInmONdkrmZINYH26+jy1l0Q0XVrwOG9NYqCmZQVRWS+PMKfMMLgQCsCoNEmUaQb7G/gStayy/01A7+DvnM/39fXZ0NgPd6OndERqamacr61A2N6pENAqNPCePm1tpljQ0utbmDVEascinR6/7gsk1+cjEs7pGy0Cn6yHjnT0HD6+oNhQ5PxeyTjHl6bRajiWhinWWVr65ldbu2q+e1yVJ6x3aHR83KCd65I33Cz19SFD4LN6XuTQtEJL2z3AOs6s8n3p0VNXRn+VwQQyXMseM4cnH43os35xyyGxzrBIIWU3E/yT8Jk72RIapVsSoJXxSmgXVffViVZkr9JnSP1ZaR8szjFy64UXxOIHqscxp5N54zROyIqTjj1yFYVDZqt6XrhGBs4S9c7A5dwhdTgKBMzj8wgzLfCbjygY05NjuTrPjqjwllGwyrSaxST/3Z+4MZC6jlRpPYhgag+lL75Cq/uwV8FHM1xtu2RvGPtaIHQBE6xn+tM8QkPSlMNCoSIGdUq1nBgbBh8L+2Z8SY0u2b3zMzMqyL2JX57hR5l/FEAS5R+bBohFp0VheASUSu0gEHNCZx6Gwm/8Dhgo1U4K5Bkt54PEKJUhlmGjd0S7p3lS9okhlX48WE7rol8YEDM2KYbzbtDXnIl/kA38AXU=
     file_glob: true
-    file: github/*
+    file: dist/*.gz
     skip_cleanup: true
     on:
       tags: true
