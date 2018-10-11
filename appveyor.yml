@@ -48,7 +48,6 @@ deploy:
   - provider: GitHub
     auth_token:
       secure: ctp+XBxvU4Q/6f55WYYIxUF06CAkiuO3VTUshHz4XWsC/sKTrQyQodIEkgfhvIPF
-    artifact: github\*
     on:
       branch: master
       appveyor_repo_tag: true
