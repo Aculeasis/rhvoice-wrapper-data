@@ -7,13 +7,13 @@ Provides RHVoice voices and languages for `rhvoice-wrapper-bin`. Also, you may s
 This package contain 24000 Hz voice sampling rate, excluded 16000 Hz for reduce size.
 
 ## Install
-`pip install rhvoice-wrapper-data --only-binary rhvoice-wrapper-data`
+`pip3 install rhvoice-wrapper-data --only-binary rhvoice-wrapper-data`
 
 ## Install from source
 Install git (`apt install git` or `run exe>next>next>done`)
 ```bash
-python -m pip install --upgrade pip setuptools wheel
-python -m pip install rhvoice-wrapper-data --no-binary rhvoice-wrapper-data
+python3 -m pip install --upgrade pip setuptools wheel
+python3 -m pip install rhvoice-wrapper-data --no-binary rhvoice-wrapper-data
 ```
 ### API
 ```python
