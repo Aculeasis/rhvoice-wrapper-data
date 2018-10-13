@@ -7,7 +7,7 @@ python:
   - '3.6'
 
 sudo:
-  true
+  false
 
 git:
   depth: 1
