@@ -7,8 +7,8 @@ from setuptools import setup
 
 PACKAGE_PATH = 'rhvoice_wrapper_data'
 RHVOICE = 'RHVoice'
+RHVOICE_VERSION = '1.0.0'
 SOURCE_URL = 'https://github.com/Olga-Yakovleva/RHVoice.git'
-CHECKOUT_COMMIT = 'dc36179'
 DATA = 'data'
 
 
@@ -52,12 +52,10 @@ class RHVoiceBuild(build):
             os.path.join(rhvoice_path, os.path.join('data', 'voices'))
         ]
 
-        clone = [['git', 'clone', SOURCE_URL, rhvoice_path], None]
-        checkout = [['git', 'checkout', CHECKOUT_COMMIT], rhvoice_path]
+        clone = [['git', 'clone', '--depth=1', '--branch', RHVOICE_VERSION, SOURCE_URL, rhvoice_path], None]
 
         if not os.path.isdir(rhvoice_path):
             self.execute(executor, clone, 'Clone {}'.format(SOURCE_URL))
-            self.execute(executor, checkout, 'Git checkout {}'.format(CHECKOUT_COMMIT))
         else:
             self.warn('Use existing source data from {}'.format(rhvoice_path))
 
