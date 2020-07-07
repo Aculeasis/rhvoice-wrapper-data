@@ -7,9 +7,9 @@ from setuptools import setup
 
 PACKAGE_PATH = 'rhvoice_wrapper_data'
 RHVOICE = 'RHVoice'
-RHVOICE_VERSION = '1.0.0'
-SOURCE_URL = 'https://github.com/Olga-Yakovleva/RHVoice.git'
-DATA = 'data'
+RHVOICE_GIT_TAG = '1.0.0'
+RHVOICE_GIT_URL = 'https://github.com/Olga-Yakovleva/RHVoice.git'
+DATA_DIR = 'data'
 
 
 def check_build(data_paths):
@@ -41,7 +41,7 @@ def executor(cmd, cwd):
 class RHVoiceBuild(build):
     def run(self):
         rhvoice_path = os.path.join(self.build_base, RHVOICE)
-        build_lib_data = os.path.join(self.build_lib, PACKAGE_PATH, DATA)
+        build_lib_data = os.path.join(self.build_lib, PACKAGE_PATH, DATA_DIR)
 
         self.mkpath(self.build_base)
         self.mkpath(self.build_lib)
@@ -52,10 +52,10 @@ class RHVoiceBuild(build):
             os.path.join(rhvoice_path, os.path.join('data', 'voices'))
         ]
 
-        clone = [['git', 'clone', '--depth=1', '--branch', RHVOICE_VERSION, SOURCE_URL, rhvoice_path], None]
+        clone = [['git', 'clone', '--depth=1', '--branch', RHVOICE_GIT_TAG, RHVOICE_GIT_URL, rhvoice_path], None]
 
         if not os.path.isdir(rhvoice_path):
-            self.execute(executor, clone, 'Clone {}'.format(SOURCE_URL))
+            self.execute(executor, clone, 'Clone {}'.format(RHVOICE_GIT_URL))
         else:
             self.warn('Use existing source data from {}'.format(rhvoice_path))
 
@@ -87,7 +87,7 @@ setup(
     name='rhvoice-wrapper-data',
     version=version,
     packages=[PACKAGE_PATH],
-    package_data={PACKAGE_PATH: [os.path.join(DATA, '*')]},
+    package_data={PACKAGE_PATH: [os.path.join(DATA_DIR, '*')]},
     url='https://github.com/Aculeasis/rhvoice-wrapper-data',
     license='GPLv3+',
     author='Aculeasis',
