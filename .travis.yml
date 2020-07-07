@@ -10,9 +10,6 @@ python:
 sudo:
   false
 
-git:
-  depth: 1
-
 install:
   - pip install setuptools wheel
 
