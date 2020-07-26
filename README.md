@@ -1,4 +1,4 @@
-# This package contain only data, [rhvoice-wrapper-bin](https://github.com/Aculeasis/rhvoice-wrapper-bin) install it yourself
+# This package contain only data, `rhvoice-wrapper-bin` install it yourself
 
 [![RHVoice](https://img.shields.io/badge/RHVoice-1.0.0-lightgrey.svg)](https://github.com/Olga-Yakovleva/RHVoice/tree/1.0.0)
 [![PyPI version](https://img.shields.io/pypi/v/rhvoice-wrapper-data.svg)](https://pypi.org/project/rhvoice-wrapper-data/)
@@ -7,7 +7,7 @@
 [![Build Status](https://travis-ci.org/Aculeasis/rhvoice-wrapper-data.svg?branch=master)](https://travis-ci.org/Aculeasis/rhvoice-wrapper-data)
 [![Build status](https://ci.appveyor.com/api/projects/status/0nnncu1pvbeqjqk1?svg=true)](https://ci.appveyor.com/project/Aculeasis/rhvoice-wrapper-data)
 
-Provides RHVoice voices and languages for `rhvoice-wrapper-bin`. Also, you may set data_path in `rhvoice-wrapper` instead.
+Provides [RHVoice](https://github.com/Olga-Yakovleva/RHVoice) voices and languages for [rhvoice-wrapper-bin](https://github.com/Aculeasis/rhvoice-wrapper-bin). Also, you may set data_path in [rhvoice-wrapper](https://github.com/Aculeasis/rhvoice-proxy) instead.
 
 This package contain 24000 Hz voice sampling rate, excluded 16000 Hz for reduce size.
 
@@ -29,8 +29,3 @@ print(rhvoice_wrapper_data.data_path)
 # Contains path to the rhvoice-wrapper-data
 print(rhvoice_wrapper_data.PATH)
 ```
-## Links
-
-- [RHVoice](https://github.com/Olga-Yakovleva/RHVoice)
-- [rhvoice-wrapper](https://github.com/Aculeasis/rhvoice-proxy)
-- [rhvoice-wrapper-bin](https://github.com/Aculeasis/rhvoice-wrapper-bin)
