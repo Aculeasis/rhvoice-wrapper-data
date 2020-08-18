@@ -9,7 +9,7 @@
 
 Provides [RHVoice](https://github.com/Olga-Yakovleva/RHVoice) voices and languages for [rhvoice-wrapper-bin](https://github.com/Aculeasis/rhvoice-wrapper-bin). Also, you may set data_path in [rhvoice-wrapper](https://github.com/Aculeasis/rhvoice-proxy) instead.
 
-This package contain 24000 Hz voice sampling rate, excluded 16000 Hz for reduce size.
+This package contains 24000 Hz voice sampling rate, excluded 16000 Hz for reduce size.
 
 ## Install
 `pip3 install rhvoice-wrapper-data --only-binary rhvoice-wrapper-data`
@@ -20,7 +20,7 @@ Install git (`apt install git` or `run exe>next>next>done`)
 python3 -m pip install --upgrade pip setuptools wheel
 python3 -m pip install rhvoice-wrapper-data --no-binary rhvoice-wrapper-data
 ```
-### API
+## API
 ```python
 import rhvoice_wrapper_data
 
@@ -29,3 +29,5 @@ print(rhvoice_wrapper_data.data_path)
 # Contains path to the rhvoice-wrapper-data
 print(rhvoice_wrapper_data.PATH)
 ```
+## License
+Some voices use non-free licenses, explore `echo $(python3 -c 'import rhvoice_wrapper_data as d; print(d.PATH)')/licenses` directory or\and RHVoice repo for more info.

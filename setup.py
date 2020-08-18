@@ -10,6 +10,7 @@ RHVOICE = 'RHVoice'
 RHVOICE_GIT_TAG = '1.0.0'
 RHVOICE_GIT_URL = 'https://github.com/Olga-Yakovleva/RHVoice.git'
 DATA_DIR = 'data'
+LICENSES_DIR = 'licenses'
 
 
 def check_build(data_paths):
@@ -21,8 +22,8 @@ def check_build(data_paths):
 def ignore_install(src, names):
     # Only 24000 adding
     if '16000' in names and os.path.isdir(os.path.join(src, '16000')) and '24000' in names:
-        return ['16000']
-    return []
+        return ['16000', 'CMakeLists.txt']
+    return ['CMakeLists.txt']
 
 
 def executor(cmd, cwd):
@@ -39,40 +40,80 @@ def executor(cmd, cwd):
 
 
 class RHVoiceBuild(build):
+    def _copy_file(self, filename, src_path, dst_path):
+        def make_dst():
+            dst__ = os.path.join(dst_path, filename)
+            if os.path.exists(dst__):
+                for x in range(1, 9999):
+                    filename_2 = '{}-{}'.format(filename, x)
+                    dst__ = os.path.join(dst_path, filename_2)
+                    if not os.path.exists(dst__):
+                        self.warn('File {} already exists in {}, save is as {}!'.format(filename, dst_path, filename_2))
+                        break
+                else:
+                    raise RuntimeError('ok')
+            return dst__
+
+        src = os.path.join(src_path, filename)
+        if not os.path.isfile(src):
+            return
+        if not os.path.exists(dst_path):
+            self.mkpath(dst_path)
+        dst = make_dst()
+        self.debug_print('copying {} to {}...'.format(src, dst))
+        dst = shutil.copy(src, dst)
+        self.debug_print('copy {} to {}'.format(src, dst))
+
+    def _copy_dirs(self, targets: list):
+        self.debug_print('Starting data copying...')
+        for src, dst in targets:
+            if os.path.exists(dst):
+                self.debug_print('Existing path {}. deleting...'.format(dst))
+                shutil.rmtree(dst, ignore_errors=True)
+            self.debug_print('copying {} to {}...'.format(src, dst))
+            dst = shutil.copytree(src, dst, ignore=ignore_install)
+            self.debug_print('copy {} to {}'.format(src, dst))
+
+    def _copy_licenses(self, src_path, targets: list):
+        self.debug_print('Starting licenses copying...')
+        dst_licenses = targets[-1][1]
+        src_voices = targets[0][0]
+        for top_license in os.listdir(src_path):
+            if top_license.lower().startswith('license'):
+                self._copy_file(top_license, src_path, dst_licenses)
+        for voice in os.listdir(src_voices):
+            src_voice = os.path.join(src_voices, voice)
+            if os.path.isdir(src_voice):
+                for target in os.listdir(src_voice):
+                    if target.lower().startswith(('license', 'readme')):
+                        self._copy_file(target, src_voice, os.path.join(dst_licenses, 'voices', voice))
+
     def run(self):
-        rhvoice_path = os.path.join(self.build_base, RHVOICE)
-        build_lib_data = os.path.join(self.build_lib, PACKAGE_PATH, DATA_DIR)
+        src_path = os.path.join(self.build_base, RHVOICE)
+        dst_path = os.path.join(self.build_lib, PACKAGE_PATH)
+        targets = [
+            (os.path.join(src_path, x), os.path.join(dst_path, x))
+            for x in [os.path.join(DATA_DIR, 'voices'), os.path.join(DATA_DIR, 'languages'), LICENSES_DIR]
+        ]
 
         self.mkpath(self.build_base)
         self.mkpath(self.build_lib)
-        self.mkpath(build_lib_data)
+        [self.mkpath(x) for _, x in targets]
 
-        data_paths = [
-            os.path.join(rhvoice_path, os.path.join('data', 'languages')),
-            os.path.join(rhvoice_path, os.path.join('data', 'voices'))
-        ]
+        clone = [['git', 'clone', '--depth=1', '--branch', RHVOICE_GIT_TAG, RHVOICE_GIT_URL, src_path], None]
 
-        clone = [['git', 'clone', '--depth=1', '--branch', RHVOICE_GIT_TAG, RHVOICE_GIT_URL, rhvoice_path], None]
-
-        if not os.path.isdir(rhvoice_path):
+        if not os.path.isdir(src_path):
             self.execute(executor, clone, 'Clone {}'.format(RHVOICE_GIT_URL))
         else:
-            self.warn('Use existing source data from {}'.format(rhvoice_path))
+            self.warn('Use existing source data from {}'.format(src_path))
 
-        msg = check_build(data_paths)
+        msg = check_build([x for x, _ in targets])
         if msg is not None:
             raise RuntimeError(msg)
 
-        if not self.dry_run:  # copy data folders
-            self.debug_print('Starting data copying...')
-            for target in data_paths:
-                dst = os.path.join(build_lib_data, os.path.basename(target))
-                if os.path.exists(dst):
-                    self.debug_print('Existing path {}. deleting...'.format(dst))
-                    shutil.rmtree(dst, ignore_errors=True)
-                self.debug_print('copying {} to {}...'.format(target, dst))
-                dst = shutil.copytree(target, dst, ignore=ignore_install)
-                self.debug_print('copy {} to {}'.format(target, dst))
+        if not self.dry_run:
+            self._copy_dirs(targets)
+            self._copy_licenses(src_path, targets)
 
         build.run(self)
 
@@ -113,7 +154,7 @@ setup(
     name='rhvoice-wrapper-data',
     version=get_version(),
     packages=[PACKAGE_PATH],
-    package_data={PACKAGE_PATH: [os.path.join(DATA_DIR, '*')]},
+    package_data={PACKAGE_PATH: [os.path.join(x, '*') for x in (DATA_DIR, LICENSES_DIR)]},
     url='https://github.com/Aculeasis/rhvoice-wrapper-data',
     license='GPLv3+',
     author='Aculeasis',
