@@ -7,7 +7,7 @@ from setuptools import setup
 
 PACKAGE_PATH = 'rhvoice_wrapper_data'
 RHVOICE = 'RHVoice'
-RHVOICE_GIT_TAG = '1.2.3'
+RHVOICE_GIT_TAG = '1.4.2'
 RHVOICE_GIT_URL = 'https://github.com/Olga-Yakovleva/RHVoice.git'
 DATA_DIR = 'data'
 LICENSES_DIR = 'licenses'
