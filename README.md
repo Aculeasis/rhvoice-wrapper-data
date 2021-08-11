@@ -2,7 +2,7 @@
 
 [![RHVoice](https://img.shields.io/badge/RHVoice-1.4.2-lightgrey.svg)](https://github.com/Olga-Yakovleva/RHVoice/tree/1.4.2)
 [![PyPI version](https://img.shields.io/pypi/v/rhvoice-wrapper-data.svg)](https://pypi.org/project/rhvoice-wrapper-data/)
-[![Python versions](https://img.shields.io/badge/python-3.6%2B-blue.svg)](https://pypi.org/project/rhvoice-wrapper-data/)
+[![Python versions](https://img.shields.io/badge/python-3.4%2B-blue.svg)](https://pypi.org/project/rhvoice-wrapper-data/)
 [![PyPI - Format](https://img.shields.io/pypi/format/rhvoice-wrapper-data.svg)](https://pypi.org/project/rhvoice-wrapper-data/)
 [![Build](https://github.com/Aculeasis/rhvoice-wrapper-data/actions/workflows/python-package.yml/badge.svg)](https://github.com/Aculeasis/rhvoice-wrapper-data/actions/workflows/python-package.yml)
 
