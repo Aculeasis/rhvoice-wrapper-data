@@ -1,0 +1,98 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    if: ${{ github.event_name != 'push' || startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, windows-2019]
+        python-version: [3.6, 3.8, 3.9]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install python dependencies
+      run: |
+        python -m pip install -U pip
+        pip install -U setuptools wheel
+
+    - name: Build Linux Package
+      if: ${{ matrix.os == 'ubuntu-20.04' }}
+      run: python setup.py sdist bdist_wheel
+    - name: Build Windows Package
+      if: ${{ matrix.os == 'windows-2019' }}
+      run: python setup.py bdist_wheel bdist_wininst
+
+    - name: Install on Linux
+      if: ${{ matrix.os == 'ubuntu-20.04' }}
+      run: pip install dist/*-any.whl
+    - name: Install on Windows
+      if: ${{ matrix.os == 'windows-2019' }}
+      run: |
+        pip install (Get-ChildItem dist\rhvoice_wrapper_data*.whl)
+        pip install rhvoice-wrapper-bin --only-binary rhvoice-wrapper-bin
+
+    - name: Test with unittest on Windows
+      if: ${{ matrix.os == 'windows-2019' }}
+      run: |
+        git clone --depth=1 https://github.com/Aculeasis/rhvoice-proxy
+        cd rhvoice-proxy
+        python -m unittest discover -v -s rhvoice_wrapper/tests/
+
+    - name: Upload Linux artifacts
+      if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-20.04' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist
+        path: dist/
+        retention-days: 2
+    - name: Upload Windows artifacts
+      if: ${{ matrix.python-version == '3.8' && matrix.os == 'windows-2019' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: windows
+        path: dist/*.exe
+        retention-days: 2
+
+  deploy:
+    needs: build
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/download-artifact@v2
+      with:
+        name: dist
+        path: dist/
+    - uses: actions/download-artifact@v2
+      with:
+        name: windows
+        path: windows/
+
+    - name: Deploy to GH Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/*.gz
+          windows/*
+    - name: Deploy to PYPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        skip_existing: true
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
