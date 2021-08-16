@@ -14,15 +14,15 @@ jobs:
     env:
       DEPLOY_NAME: dist
     if: ${{ github.event_name != 'push' || startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04]
-        python-version: [3.6, 3.8, 3.9]
         include:
-          - os: ubuntu-20.04
-            python-version: 3.8
+          - python-version: 3.6
+          - python-version: 3.8
+          - python-version: 3.9
+          - python-version: 3.8
             DEPLOY_NAME: all-voices
             ALL_VOICES: '--all-voices'
 
