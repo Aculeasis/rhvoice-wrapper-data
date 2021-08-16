@@ -1,10 +1,12 @@
 import os
 import shutil
 import subprocess
+import sys
 from distutils.command.build import build
 
 from setuptools import setup
 
+ALL_VOICES = '--all-voices' in sys.argv and sys.argv.remove('--all-voices') is None
 PACKAGE_PATH = 'rhvoice_wrapper_data'
 RHVOICE = 'RHVoice'
 RHVOICE_GIT_TAG = '1.4.2'
@@ -101,6 +103,8 @@ class RHVoiceBuild(build):
         [self.mkpath(x) for _, x in targets]
 
         clone = [['git', 'clone', '--depth=1', '--branch', RHVOICE_GIT_TAG, RHVOICE_GIT_URL, src_path], None]
+        if ALL_VOICES:
+            clone[0].insert(2, '--recursive')
 
         if not os.path.isdir(src_path):
             self.execute(executor, clone, 'Clone {}'.format(RHVOICE_GIT_URL))

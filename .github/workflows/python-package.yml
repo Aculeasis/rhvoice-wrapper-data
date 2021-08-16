@@ -11,13 +11,20 @@ on:
 
 jobs:
   build:
+    env:
+      DEPLOY_NAME: dist
     if: ${{ github.event_name != 'push' || startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, windows-2019]
+        os: [ubuntu-20.04]
         python-version: [3.6, 3.8, 3.9]
+        include:
+          - os: ubuntu-20.04
+            python-version: 3.8
+            DEPLOY_NAME: all-voices
+            ALL_VOICES: '--all-voices'
 
     steps:
     - uses: actions/checkout@v2
@@ -27,47 +34,30 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install python dependencies
       run: |
         python -m pip install -U pip
         pip install -U setuptools wheel
-
-    - name: Build Linux Package
-      if: ${{ matrix.os == 'ubuntu-20.04' }}
-      run: python setup.py sdist bdist_wheel
-    - name: Build Windows Package
-      if: ${{ matrix.os == 'windows-2019' }}
-      run: python setup.py bdist_wheel bdist_wininst
-
-    - name: Install on Linux
-      if: ${{ matrix.os == 'ubuntu-20.04' }}
-      run: pip install dist/*-any.whl
-    - name: Install on Windows
-      if: ${{ matrix.os == 'windows-2019' }}
+    - name: Build Package
+      run: python setup.py sdist bdist_wheel ${{ matrix.ALL_VOICES }}
+    - name: Install dependencies for Test
       run: |
-        pip install (Get-ChildItem dist\rhvoice_wrapper_data*.whl)
-        pip install rhvoice-wrapper-bin --only-binary rhvoice-wrapper-bin
-
-    - name: Test with unittest on Windows
-      if: ${{ matrix.os == 'windows-2019' }}
+        pip install dist/*.whl
+        wget -q https://raw.githubusercontent.com/Aculeasis/ff/main/rhv_bin.py -O rhv_bin.py
+        pip install $(python3 rhv_bin.py linux amd64)
+    - name: Test with unittest
       run: |
         git clone --depth=1 https://github.com/Aculeasis/rhvoice-proxy
         cd rhvoice-proxy
         python -m unittest discover -v -s rhvoice_wrapper/tests/
 
     - name: Upload Linux artifacts
-      if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-20.04' }}
+      if: ${{ matrix.python-version == '3.8' }}
       uses: actions/upload-artifact@v2
       with:
-        name: dist
+        name: ${{ matrix.DEPLOY_NAME }}
         path: dist/
-        retention-days: 2
-    - name: Upload Windows artifacts
-      if: ${{ matrix.python-version == '3.8' && matrix.os == 'windows-2019' }}
-      uses: actions/upload-artifact@v2
-      with:
-        name: windows
-        path: dist/*.exe
         retention-days: 2
 
   deploy:
@@ -81,15 +71,17 @@ jobs:
         path: dist/
     - uses: actions/download-artifact@v2
       with:
-        name: windows
-        path: windows/
+        name: all-voices
+        path: all-voices/
 
+    - name: Prepare to Deploy
+      run: mv all-voices/*.whl $(echo $(find all-voices/ -name *.whl) | sed -e 's/data/data_all/g')
     - name: Deploy to GH Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
           dist/*.gz
-          windows/*
+          all-voices/*.whl
     - name: Deploy to PYPI
       uses: pypa/gh-action-pypi-publish@master
       with:
