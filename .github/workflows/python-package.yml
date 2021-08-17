@@ -73,8 +73,6 @@ jobs:
         name: all-voices
         path: all-voices/
 
-    - name: Prepare to Deploy
-      run: mv all-voices/*.whl $(echo $(find all-voices/ -name *.whl) | sed -e 's/data/data_all/g')
     - name: Deploy to GH Release
       uses: softprops/action-gh-release@v1
       with:
