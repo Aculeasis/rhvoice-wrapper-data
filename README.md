@@ -1,12 +1,12 @@
 # This package contain only data, `rhvoice-wrapper-bin` will install it itself
 
-[![RHVoice](https://img.shields.io/badge/RHVoice-1.4.2-lightgrey.svg)](https://github.com/Olga-Yakovleva/RHVoice/tree/1.4.2)
+[![RHVoice](https://img.shields.io/badge/RHVoice-1.14.0-lightgrey.svg)](https://github.com/RHVoice/RHVoice/tree/1.14.0)
 [![PyPI version](https://img.shields.io/pypi/v/rhvoice-wrapper-data.svg)](https://pypi.org/project/rhvoice-wrapper-data/)
 [![Python versions](https://img.shields.io/badge/python-3.4%2B-blue.svg)](https://pypi.org/project/rhvoice-wrapper-data/)
 [![PyPI - Format](https://img.shields.io/pypi/format/rhvoice-wrapper-data.svg)](https://pypi.org/project/rhvoice-wrapper-data/)
 [![Build](https://github.com/Aculeasis/rhvoice-wrapper-data/actions/workflows/python-package.yml/badge.svg)](https://github.com/Aculeasis/rhvoice-wrapper-data/actions/workflows/python-package.yml)
 
-Provides [RHVoice](https://github.com/Olga-Yakovleva/RHVoice) voices and languages for [rhvoice-wrapper-bin](https://github.com/Aculeasis/rhvoice-wrapper-bin). Also, you may set data_path in [rhvoice-wrapper](https://github.com/Aculeasis/rhvoice-proxy) instead.
+Provides [RHVoice](https://github.com/RHVoice/RHVoice) voices and languages for [rhvoice-wrapper-bin](https://github.com/Aculeasis/rhvoice-wrapper-bin). Also, you may set data_path in [rhvoice-wrapper](https://github.com/Aculeasis/rhvoice-proxy) instead.
 
 This package contains 24000 Hz voice sampling rate, excluded 16000 Hz for reduce size.
 

@@ -9,23 +9,18 @@ from setuptools import setup
 ALL_VOICES = '--all-voices' in sys.argv and sys.argv.remove('--all-voices') is None
 PACKAGE_PATH = 'rhvoice_wrapper_data'
 RHVOICE = 'RHVoice'
-RHVOICE_GIT_TAG = '1.4.2'
-RHVOICE_GIT_URL = 'https://github.com/Olga-Yakovleva/RHVoice.git'
+RHVOICE_TAG = '1.14.0'
+RHVOICE_URL = 'https://github.com/RHVoice/RHVoice.git'
 DATA_DIR = 'data'
 LICENSES_DIR = 'licenses'
+BASE_VOICES = set('aleksandr anatol anna azamat bdl clb elena irina Leticia-F123 natalia natia nazgul slt spomenka '
+                  'talgat'.split(' '))
 
 
 def check_build(data_paths):
     for target in data_paths:
         if not os.path.isdir(target):
             return 'Directory {} not found'.format(target)
-
-
-def ignore_install(src, names):
-    # Only 24000 adding
-    if '16000' in names and os.path.isdir(os.path.join(src, '16000')) and '24000' in names:
-        return ['16000', 'CMakeLists.txt']
-    return ['CMakeLists.txt']
 
 
 def executor(cmd, cwd):
@@ -57,7 +52,7 @@ class RHVoiceBuild(build):
             return dst__
 
         src = os.path.join(src_path, filename)
-        if not os.path.isfile(src):
+        if self.dry_run or not os.path.isfile(src):
             return
         if not os.path.exists(dst_path):
             self.mkpath(dst_path)
@@ -66,58 +61,73 @@ class RHVoiceBuild(build):
         dst = shutil.copy(src, dst)
         self.debug_print('copy {} to {}'.format(src, dst))
 
-    def _copy_dirs(self, targets: list):
-        self.debug_print('Starting data copying...')
-        for src, dst in targets:
-            if os.path.exists(dst):
-                self.debug_print('Existing path {}. deleting...'.format(dst))
-                shutil.rmtree(dst, ignore_errors=True)
-            self.debug_print('copying {} to {}...'.format(src, dst))
-            dst = shutil.copytree(src, dst, ignore=ignore_install)
-            self.debug_print('copy {} to {}'.format(src, dst))
+    def _remove_dst(self, dst: str):
+        if not self.dry_run and os.path.exists(dst):
+            self.debug_print('Existing path {}. deleting...'.format(dst))
+            shutil.rmtree(dst, ignore_errors=True)
 
-    def _copy_licenses(self, src_path, targets: list):
+    def _copy_voices(self, src: str, dst: str) -> list:
+        self.debug_print('Starting voices copying {} to {}...'.format(src, dst))
+        voices = []
+        with os.scandir(src) as itr:
+            for x in itr:
+                if (ALL_VOICES or x.name in BASE_VOICES) and os.path.isdir(x.path):
+                    voices.append(x.name)
+        self._remove_dst(dst)
+        for voice in voices:
+            self._copy_dir(os.path.join(src, voice), os.path.join(dst, voice))
+        return voices
+
+    def _copy_licenses(self, src: str, dst: str, src_voices: str, voices: list):
         self.debug_print('Starting licenses copying...')
-        dst_licenses = targets[-1][1]
-        src_voices = targets[0][0]
-        for top_license in os.listdir(src_path):
+        self._copy_dir(src, dst)
+        for top_license in os.listdir(src):
             if top_license.lower().startswith('license'):
-                self._copy_file(top_license, src_path, dst_licenses)
-        for voice in os.listdir(src_voices):
+                self._copy_file(top_license, src, dst)
+        for voice in voices:
             src_voice = os.path.join(src_voices, voice)
-            if os.path.isdir(src_voice):
-                for target in os.listdir(src_voice):
-                    if target.lower().startswith(('license', 'readme')):
-                        self._copy_file(target, src_voice, os.path.join(dst_licenses, 'voices', voice))
+            for target in os.listdir(src_voice):
+                if target.lower().startswith(('license', 'readme')):
+                    self._copy_file(target, src_voice, os.path.join(dst, 'voices', voice))
+
+    def _copy_dir(self, src: str, dst: str) -> str:
+        def ignore(*_):
+            return ['16000', '.gitattributes', '.gitignore', 'CMakeLists.txt', '.git']
+        self.debug_print('Starting copying {} to {}...'.format(src, dst))
+        self._remove_dst(dst)
+        if not self.dry_run:
+            dst = shutil.copytree(src, dst, ignore=ignore)
+            self.debug_print('copied {} to {}'.format(src, dst))
+        return dst
 
     def run(self):
         src_path = os.path.join(self.build_base, RHVOICE)
         dst_path = os.path.join(self.build_lib, PACKAGE_PATH)
-        targets = [
-            (os.path.join(src_path, x), os.path.join(dst_path, x))
-            for x in [os.path.join(DATA_DIR, 'voices'), os.path.join(DATA_DIR, 'languages'), LICENSES_DIR]
-        ]
+        targets = {
+            'voices': (os.path.join(src_path, DATA_DIR, 'voices'), os.path.join(dst_path, DATA_DIR, 'voices')),
+            'languages': (os.path.join(src_path, DATA_DIR, 'languages'), os.path.join(dst_path, DATA_DIR, 'languages')),
+            'licenses': (os.path.join(src_path, LICENSES_DIR), os.path.join(dst_path, LICENSES_DIR)),
+        }
 
         self.mkpath(self.build_base)
         self.mkpath(self.build_lib)
-        [self.mkpath(x) for _, x in targets]
+        [self.mkpath(x) for (_, x) in targets.values()]
 
-        clone = [['git', 'clone', '--depth=1', '--branch', RHVOICE_GIT_TAG, RHVOICE_GIT_URL, src_path], None]
-        if ALL_VOICES:
-            clone[0].insert(2, '--recursive')
+        clone = [
+            ['git', 'clone', '--recurse-submodules', '--depth=1', '--branch', RHVOICE_TAG, RHVOICE_URL, src_path], None]
 
         if not os.path.isdir(src_path):
-            self.execute(executor, clone, 'Clone {}'.format(RHVOICE_GIT_URL))
+            self.execute(executor, clone, 'Clone {}'.format(RHVOICE_URL))
         else:
             self.warn('Use existing source data from {}'.format(src_path))
 
-        msg = check_build([x for x, _ in targets])
+        msg = check_build([x for (x, _) in targets.values()])
         if msg is not None:
             raise RuntimeError(msg)
 
-        if not self.dry_run:
-            self._copy_dirs(targets)
-            self._copy_licenses(src_path, targets)
+        voices = self._copy_voices(*targets['voices'])
+        self._copy_licenses(*targets['licenses'], targets['voices'][0], voices=voices)
+        self._copy_dir(*targets['languages'])
 
         build.run(self)
 
